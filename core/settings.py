@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+from datetime import timedelta
 import os, random, string
 from pathlib import Path
 
@@ -26,8 +27,14 @@ SECRET_KEY = "django-insecure-b+$5wugqo%4&wt1+^jy+6x+#p3z*f__c__7(j9-4qp@24nl65n
 DEBUG = True
 
 # Hosts Settings
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com', '0.0.0.0']
-CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://localhost:5085', 'http://127.0.0.1:8000', 'http://127.0.0.1:5085', 'https://core-django.onrender.com']
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".onrender.com", "0.0.0.0"]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "http://localhost:5085",
+    "http://127.0.0.1:8000",
+    "http://127.0.0.1:5085",
+    "https://core-django.onrender.com",
+]
 
 # Application definition
 
@@ -38,10 +45,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     # APPS
     "home",
-
+    "transactions",
+    "rest_framework",
+    "djoser",
+    "rest_framework_simplejwt.token_blacklist",
+    "drf_spectacular",
     # Util
     "debug_toolbar",
 ]
@@ -55,14 +65,13 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-
     # Util
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = "core.urls"
 
-UI_TEMPLATES = os.path.join(BASE_DIR, 'templates') 
+UI_TEMPLATES = os.path.join(BASE_DIR, "templates")
 
 TEMPLATES = [
     {
@@ -130,13 +139,29 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
-)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",  # added line
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,  # 10 records per page
+    "DEFAULT_FILTER_BACKENDS": ["rest_framework.filters.SearchFilter"],  # added line
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
